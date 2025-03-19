@@ -5,6 +5,7 @@ on:
       - 'main'
       - 'release-v*'
       - 'staging/*'
+      - 'fix-UpdateInstanceTypeCapacityFromNode-multiple-mathing-amis-simplified-test'
   pull_request:
   workflow_dispatch:
 jobs:
