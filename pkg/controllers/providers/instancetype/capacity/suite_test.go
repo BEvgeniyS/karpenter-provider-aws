@@ -136,6 +136,7 @@ var _ = Describe("CapacityCache", func() {
 					Kind:  object.GVK(nodeClass).Kind,
 					Name:  nodeClass.Name,
 				},
+				Requirements: make([]karpv1.NodeSelectorRequirementWithMinValues, 0),
 			},
 			Status: karpv1.NodeClaimStatus{
 				NodeName: node.Name,
