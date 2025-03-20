@@ -24,6 +24,7 @@ import (
 
 	karpv1 "sigs.k8s.io/karpenter/pkg/apis/v1"
 	"sigs.k8s.io/karpenter/pkg/cloudprovider"
+	"sigs.k8s.io/karpenter/pkg/scheduling"
 
 	v1 "github.com/aws/karpenter-provider-aws/pkg/apis/v1"
 	"github.com/aws/karpenter-provider-aws/pkg/providers/amifamily"
@@ -87,7 +88,7 @@ func (c *CloudProvider) isAMIDrifted(ctx context.Context, nodeClaim *karpv1.Node
 	if len(nodeClass.Status.AMIs) == 0 {
 		return "", fmt.Errorf("no amis exist given constraints")
 	}
-	mappedAMIs := amifamily.MapToInstanceTypes([]*cloudprovider.InstanceType{nodeInstanceType}, nodeClass.Status.AMIs)
+	mappedAMIs := amifamily.MapToInstanceTypes([]*cloudprovider.InstanceType{nodeInstanceType}, nodeClass.Status.AMIs, scheduling.AllowUndefinedWellKnownLabels)
 	if !lo.Contains(lo.Keys(mappedAMIs), instance.ImageID) {
 		return AMIDrift, nil
 	}

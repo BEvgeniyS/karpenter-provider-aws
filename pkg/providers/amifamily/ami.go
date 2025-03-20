@@ -22,6 +22,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/awslabs/operatorpkg/option"
 	"github.com/mitchellh/hashstructure/v2"
 	"github.com/patrickmn/go-cache"
 	"github.com/samber/lo"
@@ -188,26 +189,16 @@ func (p *DefaultProvider) amis(ctx context.Context, queries []DescribeImageQuery
 }
 
 // MapToInstanceTypes returns a map of AMIIDs that are the most recent on creationDate to compatible instancetypes
-func MapToInstanceTypes(instanceTypes []*cloudprovider.InstanceType, amis []v1.AMI, allowUndefinedKnownLabels ...bool) map[string][]*cloudprovider.InstanceType {
+func MapToInstanceTypes(instanceTypes []*cloudprovider.InstanceType, amis []v1.AMI, options ...option.Function[scheduling.CompatibilityOptions]) map[string][]*cloudprovider.InstanceType {
 	amiIDs := map[string][]*cloudprovider.InstanceType{}
-	allowUndefined := true
-	if len(allowUndefinedKnownLabels) > 0 {
-		allowUndefined = allowUndefinedKnownLabels[0]
-	}
 
 	for _, instanceType := range instanceTypes {
 		for _, ami := range amis {
 			var err error
-			if allowUndefined {
-				err = instanceType.Requirements.Compatible(
-					scheduling.NewNodeSelectorRequirements(ami.Requirements...),
-					scheduling.AllowUndefinedWellKnownLabels,
-				)
-			} else {
-				err = instanceType.Requirements.Compatible(
-					scheduling.NewNodeSelectorRequirements(ami.Requirements...),
-				)
-			}
+			err = instanceType.Requirements.Compatible(
+				scheduling.NewNodeSelectorRequirements(ami.Requirements...),
+				options...,
+			)
 
 			if err == nil {
 				amiIDs[ami.ID] = append(amiIDs[ami.ID], instanceType)

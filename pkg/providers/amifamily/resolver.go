@@ -127,7 +127,7 @@ func (r DefaultResolver) Resolve(nodeClass *v1.EC2NodeClass, nodeClaim *karpv1.N
 	if len(nodeClass.Status.AMIs) == 0 {
 		return nil, fmt.Errorf("no amis exist given constraints")
 	}
-	mappedAMIs := MapToInstanceTypes(instanceTypes, nodeClass.Status.AMIs)
+	mappedAMIs := MapToInstanceTypes(instanceTypes, nodeClass.Status.AMIs, scheduling.AllowUndefinedWellKnownLabels)
 	if len(mappedAMIs) == 0 {
 		return nil, fmt.Errorf("no instance types satisfy requirements of amis %v", lo.Uniq(lo.Map(nodeClass.Status.AMIs, func(a v1.AMI, _ int) string { return a.ID })))
 	}
